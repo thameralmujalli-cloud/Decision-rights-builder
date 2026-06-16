@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coordination Diagnostic :: Part 1</title>
+<title>Decision Rights Builder :: Part 2</title>
 <style>
   :root{
     --bg:#EFF2F7; --bgCover:#ECE7E1;
@@ -17,7 +17,7 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Calibri','Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1020px;margin:0 auto;padding:24px 18px 60px}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 18px 60px}
 
   header{background:var(--bgCover);padding:32px 28px;border-radius:8px;margin-bottom:24px;position:relative;overflow:hidden}
   header::before{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:var(--beige);right:-80px;top:-90px}
@@ -28,35 +28,28 @@
   .sub{font-size:18px;font-style:italic;color:var(--teal);margin:0 0 6px;position:relative;z-index:1}
   .tag{font-size:13px;color:var(--inkSoft);position:relative;z-index:1;max-width:680px}
 
-  .intro{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:18px 24px;margin-bottom:18px}
-  .intro p{margin:0;font-size:13.5px;color:var(--inkSoft);font-style:italic;line-height:1.5}
+  /* Tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:2px solid var(--rule);overflow-x:auto}
+  .tab{padding:12px 18px;font-size:13px;font-weight:700;color:var(--inkMute);background:transparent;border:0;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.5px}
+  .tab:hover{color:var(--inkSoft)}
+  .tab.active{color:var(--teal);border-bottom-color:var(--teal)}
 
-  .dim{background:var(--white);border:1px solid var(--rule);border-radius:8px;margin-bottom:14px;border-left:5px solid var(--rule);overflow:hidden}
-  .dim.d1{border-left-color:var(--teal)}
-  .dim.d2{border-left-color:var(--orange)}
-  .dim.d3{border-left-color:var(--navy)}
-  .dim.d4{border-left-color:var(--purple)}
-  .dim.d5{border-left-color:var(--red)}
-  .dim.d6{border-left-color:var(--slate)}
+  .panel{display:none}
+  .panel.active{display:block}
 
-  .dim-head{padding:16px 22px;border-bottom:1px solid var(--rule)}
-  .dim-head h3{margin:0;font-size:15px;color:var(--ink)}
-  .dim-head h3 .dnum{font-size:10px;font-weight:700;letter-spacing:4px;display:block;margin-bottom:4px}
-  .dim.d1 .dnum{color:var(--teal)} .dim.d2 .dnum{color:var(--orange)} .dim.d3 .dnum{color:var(--navy)}
-  .dim.d4 .dnum{color:var(--purple)} .dim.d5 .dnum{color:var(--red)} .dim.d6 .dnum{color:var(--slate)}
-  .dim-head .hlp{font-size:12px;color:var(--inkSoft);font-style:italic;margin:4px 0 0;line-height:1.4}
+  .card{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:22px 26px;margin-bottom:16px}
 
-  .items{padding:8px 22px 16px}
-  .item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--rule)}
-  .item:last-child{border-bottom:0}
-  .item-text{flex:1;font-size:13px;color:var(--ink);line-height:1.4}
-  .item-choice{display:flex;gap:4px;flex-shrink:0}
-  .ich{padding:6px 12px;font-size:10px;font-weight:700;letter-spacing:1px;border:1px solid var(--rule);border-radius:4px;cursor:pointer;background:var(--white);color:var(--inkMute);transition:all .15s}
-  .ich:hover{border-color:var(--inkSoft);color:var(--ink)}
-  .ich.yes.sel{background:var(--green);border-color:var(--green);color:var(--white)}
-  .ich.partial.sel{background:var(--amber);border-color:var(--amber);color:var(--white)}
-  .ich.no.sel{background:var(--red);border-color:var(--red);color:var(--white)}
+  /* Inputs */
+  label{display:block;font-size:11px;font-weight:700;color:var(--inkSoft);letter-spacing:3px;margin-bottom:6px}
+  input[type="text"], select {
+    width:100%; padding:10px 12px; border:1px solid var(--rule); border-radius:6px;
+    font-family:inherit; font-size:14px; color:var(--ink); background:var(--white);
+  }
+  input:focus, select:focus { outline:none; border-color:var(--teal) }
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .row > div{flex:1;min-width:200px}
 
+  /* Buttons */
   .actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;flex-wrap:wrap}
   .btn{font-family:inherit;font-size:13px;font-weight:700;padding:11px 22px;border-radius:6px;border:0;cursor:pointer;letter-spacing:.5px}
   .btn-primary{background:var(--teal);color:var(--white)}
@@ -65,51 +58,87 @@
   .btn-ghost{background:transparent;color:var(--inkSoft);border:1px solid var(--rule)}
   .btn-ghost:hover{color:var(--ink);border-color:var(--inkSoft)}
 
-  .progress{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:14px 22px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-  .progress .lbl{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--inkSoft)}
-  .progress .ct{font-size:18px;font-weight:700;color:var(--ink)}
-  .progress .bar{flex:1;height:8px;background:var(--bgCover);border-radius:4px;margin:0 18px;overflow:hidden;position:relative}
-  .progress .bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--teal);transition:width .25s;border-radius:4px}
-
-  .result{display:none;margin-top:20px}
-  .result.show{display:block}
-  .result-head{padding:24px 28px;color:var(--white);border-radius:8px 8px 0 0}
-  .result-head.strong{background:var(--green)}
-  .result-head.adequate{background:var(--amber)}
-  .result-head.weak{background:var(--red)}
-  .result-head .lbl{font-size:11px;font-weight:700;letter-spacing:6px;opacity:.9}
-  .result-head h2{margin:6px 0 0;font-size:36px}
-  .result-head .scoredtl{font-size:14px;opacity:.95;font-style:italic;margin-top:6px}
-  .result-body{background:var(--white);border:1px solid var(--rule);border-top:0;border-radius:0 0 8px 8px;padding:22px 28px}
-
   h3.sec{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:5px;margin:0 0 14px}
 
-  .dim-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
-  .ds-card{background:var(--white);border:1px solid var(--rule);border-radius:6px;padding:12px;text-align:center}
-  .ds-card.d1{border-top:4px solid var(--teal)}
-  .ds-card.d2{border-top:4px solid var(--orange)}
-  .ds-card.d3{border-top:4px solid var(--navy)}
-  .ds-card.d4{border-top:4px solid var(--purple)}
-  .ds-card.d5{border-top:4px solid var(--red)}
-  .ds-card.d6{border-top:4px solid var(--slate)}
-  .ds-card .nm{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--inkSoft);margin-bottom:4px}
-  .ds-card .pct{font-size:26px;font-weight:700;color:var(--ink)}
-  .ds-card .pct small{font-size:11px;color:var(--inkMute);font-weight:400}
+  /* ========== TAB 1: MATRIX BUILDER ========== */
+  .result1{display:none;margin-top:18px}
+  .result1.show{display:block}
+  .matrix-banner{padding:18px 24px;border-radius:8px 8px 0 0;background:var(--teal);color:var(--white)}
+  .matrix-banner .lbl{font-size:11px;font-weight:700;letter-spacing:6px;opacity:.9}
+  .matrix-banner h2{margin:6px 0 0;font-size:22px}
+  .matrix-banner p{margin:8px 0 0;font-size:13px;opacity:.95;font-style:italic}
 
-  .gaps{list-style:none;padding:0;margin:0}
-  .gaps li{padding:11px 0;border-bottom:1px solid var(--rule);display:flex;gap:14px;font-size:13px}
-  .gaps li:last-child{border-bottom:0}
-  .gaps .rank{font-size:13px;font-weight:700;color:var(--red);min-width:30px}
-  .gaps .gtext{flex:1;color:var(--ink);line-height:1.4}
-  .gaps .gdim{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--inkMute);min-width:90px;align-self:center}
+  .matrix-wrap{background:var(--white);border:1px solid var(--rule);border-top:0;border-radius:0 0 8px 8px;padding:20px;overflow-x:auto}
+  table.dr-matrix{width:100%;border-collapse:collapse;min-width:780px}
+  table.dr-matrix th{padding:10px 8px;background:var(--slate);color:var(--white);font-size:9.5px;letter-spacing:3px;font-weight:700;text-align:center}
+  table.dr-matrix th.decides{background:var(--orange)}
+  table.dr-matrix th.label{background:var(--slate);text-align:center}
+  table.dr-matrix td{padding:11px 10px;font-size:11.5px;text-align:center;border:1px solid var(--rule);color:var(--ink);vertical-align:middle}
+  table.dr-matrix td.row-label{font-weight:700;color:var(--white);letter-spacing:3px;font-size:10px;text-align:center;padding:8px}
+  table.dr-matrix td.row-label.strategic{background:var(--navy)}
+  table.dr-matrix td.row-label.technical{background:var(--teal)}
+  table.dr-matrix td.row-label.commercial{background:var(--orange)}
+  table.dr-matrix td.row-label.schedule{background:var(--purple)}
+  table.dr-matrix td.row-label.regulatory{background:var(--red)}
+  table.dr-matrix td.decides-cell{font-weight:700}
+  table.dr-matrix td.decides-cell.strategic{background:var(--navyTint);color:var(--navy)}
+  table.dr-matrix td.decides-cell.technical{background:var(--tealTint);color:var(--teal)}
+  table.dr-matrix td.decides-cell.commercial{background:var(--orangeTint);color:var(--orange)}
+  table.dr-matrix td.decides-cell.schedule{background:var(--purpleTint);color:var(--purple)}
+  table.dr-matrix td.decides-cell.regulatory{background:var(--redTint);color:var(--red)}
+
+  .matrix-notes{margin-top:18px;padding:14px 18px;background:var(--bgCover);border-radius:6px}
+  .matrix-notes h4{margin:0 0 8px;font-size:11px;font-weight:700;color:var(--teal);letter-spacing:4px}
+  .matrix-notes ul{margin:0;padding-left:20px;font-size:13px;color:var(--ink);line-height:1.6}
+
+  /* ========== TAB 2: RACI vs RAPID SELECTOR ========== */
+  .q{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:18px 22px;margin-bottom:12px;border-left:5px solid var(--rule)}
+  .q.q1{border-left-color:var(--teal)}
+  .q.q2{border-left-color:var(--orange)}
+  .q.q3{border-left-color:var(--navy)}
+  .q.q4{border-left-color:var(--purple)}
+  .q.q5{border-left-color:var(--red)}
+  .q h4{margin:0 0 4px;font-size:14px;color:var(--ink)}
+  .q .qnum{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--inkMute);display:block;margin-bottom:6px}
+  .q .qhlp{font-size:12px;font-style:italic;color:var(--inkSoft);margin:0 0 12px;line-height:1.4}
+  .q-choice{display:flex;gap:6px;flex-wrap:wrap}
+  .qch{flex:1;min-width:140px;padding:10px 14px;font-size:12px;font-weight:600;border:1px solid var(--rule);border-radius:6px;cursor:pointer;background:var(--white);color:var(--inkSoft);text-align:left;line-height:1.3}
+  .qch:hover{border-color:var(--inkSoft);color:var(--ink)}
+  .qch.sel{border-width:2px;font-weight:700}
+  .qch.raci.sel{background:var(--tealTint);border-color:var(--teal);color:var(--teal)}
+  .qch.rapid.sel{background:var(--orangeTint);border-color:var(--orange);color:var(--orange)}
+
+  .result2{display:none;margin-top:18px;border-radius:8px;overflow:hidden}
+  .result2.show{display:block}
+  .r2-head{padding:24px 28px;color:var(--white)}
+  .r2-head.raci{background:var(--teal)}
+  .r2-head.rapid{background:var(--orange)}
+  .r2-head.both{background:var(--navy)}
+  .r2-head .lbl{font-size:11px;font-weight:700;letter-spacing:6px;opacity:.9}
+  .r2-head h2{margin:6px 0 0;font-size:34px}
+  .r2-head p{margin:8px 0 0;font-size:14px;opacity:.95;font-style:italic}
+  .r2-body{background:var(--white);border:1px solid var(--rule);border-top:0;padding:22px 28px}
+  .r2-body p{font-size:13.5px;color:var(--ink);line-height:1.55;margin:0 0 12px}
+  .r2-body ul{margin:0 0 16px;padding-left:20px;font-size:13.5px;color:var(--ink);line-height:1.6}
+
+  .score-row{display:flex;gap:14px;margin-bottom:20px}
+  .score-card{flex:1;padding:16px;border:2px solid var(--rule);border-radius:8px;text-align:center}
+  .score-card.win{background:var(--bgCover)}
+  .score-card.win.raci{border-color:var(--teal)}
+  .score-card.win.rapid{border-color:var(--orange)}
+  .score-card .nm{font-size:13px;font-weight:700;letter-spacing:4px;color:var(--inkSoft)}
+  .score-card .nm.raci{color:var(--teal)}
+  .score-card .nm.rapid{color:var(--orange)}
+  .score-card .val{font-size:34px;font-weight:700;color:var(--ink);line-height:1}
+  .score-card .val small{font-size:13px;color:var(--inkMute);font-weight:400}
 
   footer{margin-top:30px;padding:20px 0;border-top:1px solid var(--rule);font-size:12px;color:var(--inkSoft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 
   @media(max-width:680px){
     h1{font-size:24px}
-    .item{flex-direction:column;align-items:stretch}
-    .progress{flex-wrap:wrap}
-    .progress .bar{flex-basis:100%;margin:8px 0}
+    .score-row{flex-direction:column}
+    .q-choice{flex-direction:column}
+    .qch{min-width:auto}
   }
 </style>
 </head>
@@ -118,285 +147,447 @@
 
   <header>
     <div class="series">THE DEVELOPER'S COORDINATION PLAYBOOK</div>
-    <div class="partmark">PART 01 :: INTERACTIVE TOOLKIT</div>
-    <h1>Coordination Diagnostic</h1>
-    <p class="sub">30 items. Six dimensions. One score.</p>
-    <p class="tag">A self-assessment for owner-side project teams. Score your current project across the six dimensions of coordination, identify the priority gaps, and decide where to focus the next 30 days.</p>
+    <div class="partmark">PART 02 :: INTERACTIVE TOOLKIT</div>
+    <h1>Decision Rights Builder</h1>
+    <p class="sub">Build the matrix. Choose the framework.</p>
+    <p class="tag">Two tools for owner-side governance. Tab 1 generates a baseline Decision Rights Matrix tailored to project type, team structure, and complexity. Tab 2 helps pick between RACI and RAPID for a specific decision context.</p>
   </header>
 
-  <div class="intro">
-    <p>Answer 30 items as YES (in place and working), PARTIAL (in place but not fully working), or NO (not in place). The diagnostic returns a percentage score, a per-dimension breakdown, and your top 5 priority gaps to close first.</p>
+  <div class="tabs">
+    <button class="tab active" data-panel="matrix" onclick="showPanel('matrix')">MATRIX BUILDER</button>
+    <button class="tab" data-panel="selector" onclick="showPanel('selector')">RACI VS RAPID</button>
   </div>
 
-  <div class="progress">
-    <span class="lbl">PROGRESS</span>
-    <div class="bar"><div class="bar-fill" id="progFill" style="width:0%"></div></div>
-    <span class="ct"><span id="progCt">0</span><small style="font-size:12px;color:var(--inkMute);font-weight:400"> / 30</small></span>
-  </div>
-
-  <div id="dimensions"></div>
-
-  <div class="actions">
-    <button class="btn btn-ghost" onclick="resetAll()">Reset</button>
-    <button class="btn btn-primary" id="scoreBtn" onclick="showResult()" disabled>Score the diagnostic</button>
-  </div>
-
-  <div class="result" id="result">
-    <div class="result-head" id="resultHead">
-      <div class="lbl">COORDINATION SCORE</div>
-      <h2 id="scoreNum">0%</h2>
-      <div class="scoredtl" id="scoreDtl">...</div>
+  <!-- ============================================ -->
+  <!-- PANEL 1: MATRIX BUILDER -->
+  <!-- ============================================ -->
+  <div class="panel active" id="panel-matrix">
+    <div class="card">
+      <p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 14px;font-style:italic">Set the project parameters. The tool returns a tailored five-row decision rights matrix you can take into your kickoff workshop.</p>
+      <div class="row">
+        <div>
+          <label>PROJECT TYPE</label>
+          <select id="projType">
+            <option value="commercial">Commercial development</option>
+            <option value="residential">Residential development</option>
+            <option value="mixed">Mixed-use development</option>
+            <option value="infrastructure">Infrastructure / Public works</option>
+            <option value="hospitality">Hospitality / Hotel</option>
+          </select>
+        </div>
+        <div>
+          <label>PROJECT VALUE</label>
+          <select id="projValue">
+            <option value="small">Under SAR 100M</option>
+            <option value="medium" selected>SAR 100M to 500M</option>
+            <option value="large">SAR 500M to 2B</option>
+            <option value="mega">Above SAR 2B (giga-project)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>OWNER STRUCTURE</label>
+          <select id="ownStructure">
+            <option value="lean">Lean owner team (PMO of 5 or fewer)</option>
+            <option value="standard" selected>Standard PMO with delegated PM</option>
+            <option value="enterprise">Enterprise PMO with multiple directors</option>
+          </select>
+        </div>
+        <div>
+          <label>DELIVERY MODEL</label>
+          <select id="delivModel">
+            <option value="dbb">Design-Bid-Build</option>
+            <option value="db" selected>Design-Build</option>
+            <option value="emcm">EPCM / Construction Manager</option>
+            <option value="ppp">PPP / Concession</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="resetMatrix()">Reset</button>
+        <button class="btn btn-primary" onclick="buildMatrix()">Generate the matrix</button>
+      </div>
     </div>
-    <div class="result-body">
-      <h3 class="sec">DIMENSION BREAKDOWN</h3>
-      <div class="dim-scores" id="dimScores"></div>
 
-      <h3 class="sec">TOP 5 PRIORITY GAPS</h3>
-      <ul class="gaps" id="gapList"></ul>
+    <div class="result1" id="result1">
+      <div class="matrix-banner">
+        <div class="lbl">DECISION RIGHTS MATRIX</div>
+        <h2 id="matrixTitle">...</h2>
+        <p id="matrixSubtitle">...</p>
+      </div>
+      <div class="matrix-wrap">
+        <table class="dr-matrix">
+          <thead>
+            <tr>
+              <th class="label">DECISION TYPE</th>
+              <th>RECOMMENDS</th>
+              <th class="decides">DECIDES</th>
+              <th>CONSULTED</th>
+              <th>INFORMED</th>
+            </tr>
+          </thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+        <div class="matrix-notes">
+          <h4>NOTES FOR THIS MATRIX</h4>
+          <ul id="matrixNotes"></ul>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="resetMatrix()">Reset</button>
+          <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <h3 class="sec">WHAT TO DO NEXT</h3>
-      <p id="nextSteps" style="font-size:13.5px;color:var(--ink);line-height:1.55;margin:0"></p>
+  <!-- ============================================ -->
+  <!-- PANEL 2: RACI VS RAPID SELECTOR -->
+  <!-- ============================================ -->
+  <div class="panel" id="panel-selector">
+    <div class="card">
+      <p style="font-size:13.5px;color:var(--inkSoft);margin:0 0 14px;font-style:italic">Answer five questions about a specific decision context. The tool returns a recommendation: RACI, RAPID, or both, with the rationale.</p>
+    </div>
 
-      <div class="actions" style="margin-top:20px">
-        <button class="btn btn-ghost" onclick="resetAll()">Run again</button>
-        <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+    <div class="q q1" data-q="1">
+      <span class="qnum">QUESTION 01</span>
+      <h4>How many people meaningfully influence this decision?</h4>
+      <p class="qhlp">Influence means their input changes the outcome, not just their awareness.</p>
+      <div class="q-choice">
+        <button class="qch raci" onclick="setQ(1,'raci')">Few (2-4). Stable team, clear leads.</button>
+        <button class="qch rapid" onclick="setQ(1,'rapid')">Many (5+). Cross-functional, network of influence.</button>
+      </div>
+    </div>
+
+    <div class="q q2" data-q="2">
+      <span class="qnum">QUESTION 02</span>
+      <h4>How often will this decision type recur?</h4>
+      <p class="qhlp">Recurrence affects whether you need a heavyweight framework or a lighter one.</p>
+      <div class="q-choice">
+        <button class="qch raci" onclick="setQ(2,'raci')">Frequently (weekly or monthly). Routine operational call.</button>
+        <button class="qch rapid" onclick="setQ(2,'rapid')">Rarely (quarterly or one-time). High-stakes, low-frequency.</button>
+      </div>
+    </div>
+
+    <div class="q q3" data-q="3">
+      <span class="qnum">QUESTION 03</span>
+      <h4>Where is the friction usually?</h4>
+      <p class="qhlp">Different frameworks solve different friction patterns.</p>
+      <div class="q-choice">
+        <button class="qch raci" onclick="setQ(3,'raci')">Confusion between who works and who decides.</button>
+        <button class="qch rapid" onclick="setQ(3,'rapid')">Confusion between recommender and decider.</button>
+      </div>
+    </div>
+
+    <div class="q q4" data-q="4">
+      <span class="qnum">QUESTION 04</span>
+      <h4>How clear is the decision question at the start?</h4>
+      <p class="qhlp">RAPID works best when the question has to be framed before the decision is made.</p>
+      <div class="q-choice">
+        <button class="qch raci" onclick="setQ(4,'raci')">Clear. The question is well-defined, the options are bounded.</button>
+        <button class="qch rapid" onclick="setQ(4,'rapid')">Ambiguous. Recommending the question is half the work.</button>
+      </div>
+    </div>
+
+    <div class="q q5" data-q="5">
+      <span class="qnum">QUESTION 05</span>
+      <h4>What is the cost of a bad call?</h4>
+      <p class="qhlp">Higher stakes justify more sophisticated frameworks.</p>
+      <div class="q-choice">
+        <button class="qch raci" onclick="setQ(5,'raci')">Recoverable. A wrong call can be corrected in the next cycle.</button>
+        <button class="qch rapid" onclick="setQ(5,'rapid')">Strategic. A wrong call shapes the project for years.</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="resetSelector()">Reset</button>
+      <button class="btn btn-primary" id="selBtn" onclick="showSelectorResult()" disabled>See the recommendation</button>
+    </div>
+
+    <div class="result2" id="result2">
+      <div class="r2-head" id="r2head">
+        <div class="lbl">RECOMMENDED FRAMEWORK</div>
+        <h2 id="r2title">...</h2>
+        <p id="r2line">...</p>
+      </div>
+      <div class="r2-body">
+        <div class="score-row" id="scoreRow"></div>
+        <h3 class="sec">WHY THIS FRAMEWORK</h3>
+        <p id="r2why"></p>
+        <h3 class="sec">HOW TO APPLY IT</h3>
+        <ul id="r2steps"></ul>
+        <div class="actions" style="margin-top:6px">
+          <button class="btn btn-ghost" onclick="resetSelector()">Run again</button>
+          <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+        </div>
       </div>
     </div>
   </div>
 
   <footer>
     <span><b>Thamer AlMujalli</b> · PMO-CP · PMI-CP · PMP · P6</span>
-    <span>The Developer's Coordination Playbook · Part 1 of 4</span>
+    <span>The Developer's Coordination Playbook · Part 2 of 4</span>
   </footer>
 
 </div>
 
 <script>
 // ============================================================================
-// THE 30 ITEMS (5 PER DIMENSION)
+// TAB SWITCHING
 // ============================================================================
-const DIMENSIONS = [
-  {
-    n: 1, key: 'd1', name: 'DISCIPLINES', color: 'teal',
-    help: 'How well disciplines coordinate inside the lead consultant\'s appointment.',
-    items: [
-      'A named owner-side coordination lead is in place, with authority and time allocated.',
-      'A federated BIM model is maintained and reviewed at an agreed cadence.',
-      'Discipline interfaces (architecture-structural-MEP-façade) are tracked in a live register.',
-      'Clash detection runs are scheduled, with closure tracked against an owner-side target.',
-      'Sustainability and code compliance are integrated from concept, not bolted on at IFC.'
-    ]
-  },
-  {
-    n: 2, key: 'd2', name: 'PACKAGES', color: 'orange',
-    help: 'Coordination across packages, contractors, and consultants.',
-    items: [
-      'A package interface matrix exists, identifying every cross-package dependency.',
-      'Each interface has a named owner on each side, with escalation routes defined.',
-      'Package handovers (from one contractor to the next) follow a defined readiness checklist.',
-      'Long-lead items and shared services (cranes, hoists, power) are coordinated centrally.',
-      'Package scope overlaps and gaps are reviewed before each tender is released.'
-    ]
-  },
-  {
-    n: 3, key: 'd3', name: 'STAKEHOLDERS', color: 'navy',
-    help: 'Coordination across sponsors, regulators, end users, and lenders.',
-    items: [
-      'A stakeholder map names every party, their interest, and their decision rhythm.',
-      'Regulator engagement (REGA, Balady, NWC, Saudi Energy, Mostadam) has a single owner-side contact.',
-      'Sponsor and board updates have a defined format, frequency, and decision agenda.',
-      'End users and operators are engaged before design freeze, not after handover.',
-      'Lender and equity coordination tracks drawdown gates and term conditions in real time.'
-    ]
-  },
-  {
-    n: 4, key: 'd4', name: 'SEQUENCE', color: 'purple',
-    help: 'Coordination across project stages, from design to operations.',
-    items: [
-      'Each stage gate has a defined readiness checklist before progression is approved.',
-      'Design-to-tender handover preserves discipline coordination through procurement.',
-      'Tender-to-construction handover transfers interface management to the contractor team.',
-      'Construction-to-handover transition includes operator training and asset register validation.',
-      'Lessons learned are captured live at each stage, not as a post-project exercise.'
-    ]
-  },
-  {
-    n: 5, key: 'd5', name: 'INFORMATION', color: 'red',
-    help: 'The CDE, BIM, registers, and project record. Owned by the owner.',
-    items: [
-      'An owner-side Common Data Environment is live, not adopted from the contractor.',
-      'Document numbering, revision control, and access permissions are defined and enforced.',
-      'A single federated BIM model is the source of truth for design coordination.',
-      'RFI, RAID, and decisions registers are maintained on the owner side, not the contractor side.',
-      'The project record will survive the contractor leaving site, in a format the owner can read.'
-    ]
-  },
-  {
-    n: 6, key: 'd6', name: 'DECISIONS', color: 'slate',
-    help: 'Decision rights, decision rhythm, and decision documentation.',
-    items: [
-      'A decision rights matrix exists, distinguishing strategic, technical, commercial, and schedule decisions.',
-      'Each decision type has a named decider, recommender, consulted, and informed party.',
-      'A standing decisions log records every material decision with its basis and date.',
-      'Escalation thresholds are defined, with time limits before a decision is automatically escalated.',
-      'Stuck decisions are identified weekly and routed to a named individual to break.'
-    ]
+function showPanel(name){
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.panel === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ============================================================================
+// TAB 1: MATRIX BUILDER LOGIC
+// ============================================================================
+const ROW_CLASSES = ['strategic','technical','commercial','schedule','regulatory'];
+
+function buildMatrix() {
+  const projType = document.getElementById('projType').value;
+  const projValue = document.getElementById('projValue').value;
+  const ownStruct = document.getElementById('ownStructure').value;
+  const delivModel = document.getElementById('delivModel').value;
+
+  // Build the matrix based on inputs
+  const matrix = generateMatrix(projType, projValue, ownStruct, delivModel);
+
+  // Update banner
+  const typeLabels = {
+    commercial: 'Commercial Development',
+    residential: 'Residential Development',
+    mixed: 'Mixed-Use Development',
+    infrastructure: 'Infrastructure',
+    hospitality: 'Hospitality'
+  };
+  const valueLabels = {
+    small: 'Under SAR 100M',
+    medium: 'SAR 100M to 500M',
+    large: 'SAR 500M to 2B',
+    mega: 'Giga-project (above SAR 2B)'
+  };
+  document.getElementById('matrixTitle').textContent = typeLabels[projType] + ', ' + valueLabels[projValue];
+  document.getElementById('matrixSubtitle').textContent = 'Baseline matrix. Take this into the kickoff workshop and tailor it to your named individuals.';
+
+  // Build table body
+  const tbody = document.getElementById('matrixBody');
+  tbody.innerHTML = matrix.rows.map((r, i) => {
+    const cls = ROW_CLASSES[i];
+    return `
+      <tr>
+        <td class="row-label ${cls}">${r.type}</td>
+        <td>${r.recs}</td>
+        <td class="decides-cell ${cls}">${r.dec}</td>
+        <td>${r.cons}</td>
+        <td>${r.inf}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Notes
+  document.getElementById('matrixNotes').innerHTML = matrix.notes.map(n => `<li>${n}</li>`).join('');
+
+  document.getElementById('result1').classList.add('show');
+  document.getElementById('result1').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function generateMatrix(type, value, structure, delivery) {
+  // Strategic decider varies by project value and owner structure
+  const stratDec = (value === 'mega' || structure === 'enterprise')
+    ? 'Board / Investment Committee'
+    : 'Sponsor / Owner Principal';
+
+  // Technical decider varies by delivery model
+  const techDec = (delivery === 'db' || delivery === 'emcm')
+    ? 'Engineering Director (Owner)'
+    : 'Lead Consultant + Owner Eng. Lead';
+
+  // Technical recommender
+  const techRec = (delivery === 'db') ? 'Design-Build Contractor' : 'Lead Consultant';
+
+  // Commercial decider varies by value and structure
+  const commDec = (value === 'small' || value === 'medium')
+    ? 'PM (within delegation limit)'
+    : 'Commercial Director (above threshold)';
+
+  // Regulatory decider varies by project type
+  const regDec = (type === 'infrastructure' || type === 'hospitality')
+    ? 'Sponsor (regulator-facing)'
+    : 'Owner Principal';
+
+  // Schedule decider is usually PM regardless
+  const schedDec = (structure === 'lean') ? 'PM (sole)' : 'PM (with Eng. Director sign-off)';
+
+  // Consulted list scales with complexity
+  const stratCons = (value === 'mega' || value === 'large')
+    ? 'Eng. Director, Comm. Director, Legal, External Advisors'
+    : 'Engineering Director, Commercial Manager';
+
+  const techCons = (delivery === 'db')
+    ? 'Owner Eng. Lead, Specialist Consultants'
+    : 'Specialist Consultants, Owner Eng. Lead';
+
+  const commCons = (value === 'mega' || value === 'large')
+    ? 'Cost Manager, Legal, Engineer'
+    : 'Cost Manager, Engineer';
+
+  const schedCons = 'Engineering Director, Commercial Manager, All discipline leads';
+
+  const regCons = (type === 'infrastructure')
+    ? 'Legal, Regulatory Specialist, Lead Consultant'
+    : 'Legal, Lead Consultant';
+
+  // Informed list
+  const stratInf = 'PMO, PM, Cost Manager';
+  const techInf = 'PM, Site Team, PMO';
+  const commInf = (value === 'mega') ? 'Sponsor, PMO, Audit' : 'PMO, Sponsor';
+  const schedInf = 'All disciplines, External stakeholders (selectively)';
+  const regInf = 'PM, Site Team, External Stakeholders';
+
+  const rows = [
+    { type: 'STRATEGIC',  recs: 'PMO Director',           dec: stratDec, cons: stratCons, inf: stratInf },
+    { type: 'TECHNICAL',  recs: techRec,                  dec: techDec,  cons: techCons,  inf: techInf },
+    { type: 'COMMERCIAL', recs: 'Commercial Manager',     dec: commDec,  cons: commCons,  inf: commInf },
+    { type: 'SCHEDULE',   recs: 'Planner / P6 Lead',      dec: schedDec, cons: schedCons, inf: schedInf },
+    { type: 'REGULATORY', recs: 'Regulatory Liaison',     dec: regDec,   cons: regCons,   inf: regInf },
+  ];
+
+  // Notes tailored to inputs
+  const notes = [
+    'Every DECIDES cell must name one real person before kickoff. Do not leave a role title without a name attached.',
+    'Set a time limit per decision type. Strategic decisions: 5 working days. Technical: 3. Commercial under threshold: 1. Above threshold: 5.'
+  ];
+
+  if (value === 'mega' || value === 'large') {
+    notes.push('At this project value, board-level visibility on strategic decisions is non-negotiable. Confirm the Investment Committee meeting cadence in week one.');
   }
-];
+  if (delivery === 'db') {
+    notes.push('Under Design-Build, the Contractor recommends technical decisions but the Owner decides on Employer Requirements compliance. Watch for the contractor framing Owner approvals as variations.');
+  }
+  if (delivery === 'emcm') {
+    notes.push('Under EPCM, the Construction Manager recommends, the Owner decides. Define the threshold above which CM recommendations require Owner sign-off rather than just notification.');
+  }
+  if (structure === 'lean') {
+    notes.push('Lean owner team. Avoid loading too many CONSULTED parties. Three named consultants per decision is usually enough.');
+  }
+  if (structure === 'enterprise') {
+    notes.push('Enterprise PMO. Confirm decision rights do not get re-litigated across PMO layers. Map who in the PMO decides versus who is informed.');
+  }
+  if (type === 'infrastructure') {
+    notes.push('Infrastructure projects carry heavier regulatory load. Allocate dedicated regulator-facing capacity and put a Regulatory Liaison in the matrix from day one.');
+  }
+  if (type === 'hospitality') {
+    notes.push('Hospitality projects require operator input from concept. Add Hotel Operator as CONSULTED on strategic and technical rows.');
+  }
 
-// ============================================================================
-// STATE
-// ============================================================================
-const answers = {}; // { 'd1-0': 'yes' | 'partial' | 'no', ... }
-const VAL = { yes: 1.0, partial: 0.5, no: 0.0 };
-
-// ============================================================================
-// RENDER DIMENSIONS
-// ============================================================================
-function render() {
-  const root = document.getElementById('dimensions');
-  root.innerHTML = DIMENSIONS.map(d => `
-    <div class="dim ${d.key}">
-      <div class="dim-head">
-        <h3><span class="dnum">DIMENSION 0${d.n}</span>${d.name}</h3>
-        <p class="hlp">${d.help}</p>
-      </div>
-      <div class="items">
-        ${d.items.map((it, i) => `
-          <div class="item">
-            <div class="item-text">${it}</div>
-            <div class="item-choice">
-              <button class="ich yes" onclick="setAnswer('${d.key}',${i},'yes')">YES</button>
-              <button class="ich partial" onclick="setAnswer('${d.key}',${i},'partial')">PARTIAL</button>
-              <button class="ich no" onclick="setAnswer('${d.key}',${i},'no')">NO</button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+  return { rows, notes };
 }
 
-function setAnswer(key, idx, val) {
-  const id = key + '-' + idx;
-  answers[id] = val;
-  // Update button styles
-  const item = document.querySelectorAll(`.dim.${key} .item`)[idx];
-  item.querySelectorAll('.ich').forEach(b => b.classList.remove('sel'));
-  item.querySelector(`.ich.${val}`).classList.add('sel');
-  // Update progress
-  const ct = Object.keys(answers).length;
-  document.getElementById('progCt').textContent = ct;
-  document.getElementById('progFill').style.width = (ct / 30 * 100) + '%';
-  document.getElementById('scoreBtn').disabled = ct < 30;
-}
-
-function resetAll() {
-  for (const k in answers) delete answers[k];
-  document.querySelectorAll('.ich').forEach(b => b.classList.remove('sel'));
-  document.getElementById('progCt').textContent = '0';
-  document.getElementById('progFill').style.width = '0%';
-  document.getElementById('scoreBtn').disabled = true;
-  document.getElementById('result').classList.remove('show');
+function resetMatrix() {
+  document.getElementById('projType').value = 'commercial';
+  document.getElementById('projValue').value = 'medium';
+  document.getElementById('ownStructure').value = 'standard';
+  document.getElementById('delivModel').value = 'db';
+  document.getElementById('result1').classList.remove('show');
 }
 
 // ============================================================================
-// SCORING
+// TAB 2: RACI VS RAPID SELECTOR
 // ============================================================================
-function showResult() {
-  // Compute per-dimension scores
-  const dimResults = DIMENSIONS.map(d => {
-    let sum = 0;
-    let count = 0;
-    for (let i = 0; i < d.items.length; i++) {
-      const v = answers[d.key + '-' + i];
-      if (v !== undefined) {
-        sum += VAL[v];
-        count++;
-      }
-    }
-    const pct = count > 0 ? Math.round((sum / count) * 100) : 0;
-    return { ...d, pct, sum, count };
-  });
+const selAnswers = {};
 
-  // Overall score
-  const overallSum = dimResults.reduce((a, d) => a + d.sum, 0);
-  const overallCount = dimResults.reduce((a, d) => a + d.count, 0);
-  const overall = Math.round((overallSum / overallCount) * 100);
+function setQ(qnum, val) {
+  selAnswers[qnum] = val;
+  const qEl = document.querySelector(`.q[data-q="${qnum}"]`);
+  qEl.querySelectorAll('.qch').forEach(b => b.classList.remove('sel'));
+  qEl.querySelector(`.qch.${val}`).classList.add('sel');
+  const ct = Object.keys(selAnswers).length;
+  document.getElementById('selBtn').disabled = ct < 5;
+}
 
-  // Verdict
-  let verdict, line, color;
-  if (overall >= 75) {
-    color = 'strong';
-    verdict = 'STRONG COORDINATION POSTURE';
-    line = 'The fundamentals are in place. Focus on the residual gaps and the dimensions still scoring partial.';
-  } else if (overall >= 50) {
-    color = 'adequate';
-    verdict = 'ADEQUATE BUT INCOMPLETE';
-    line = 'Coordination is partly working, partly improvised. The gaps below are the priorities for the next 30 days.';
+function resetSelector() {
+  for (const k in selAnswers) delete selAnswers[k];
+  document.querySelectorAll('.qch').forEach(b => b.classList.remove('sel'));
+  document.getElementById('selBtn').disabled = true;
+  document.getElementById('result2').classList.remove('show');
+}
+
+function showSelectorResult() {
+  let raciCount = 0, rapidCount = 0;
+  for (const k in selAnswers) {
+    if (selAnswers[k] === 'raci') raciCount++;
+    else rapidCount++;
+  }
+
+  let verdict, color, line, why, steps;
+
+  if (raciCount >= 4) {
+    verdict = 'USE RACI';
+    color = 'raci';
+    line = 'Your context favours operational clarity over strategic ambiguity. RACI is the right tool here.';
+    why = 'You described a context with a small, stable team, recurring decisions, and clear question framing. RACI excels at exactly this. The Responsible/Accountable split is enough to keep work and decisions separated. Adding RAPID layers would create overhead without solving a real problem.';
+    steps = [
+      'Draft the RACI at kickoff with named individuals in every cell.',
+      'Make the Accountable column a single person per row, not a group.',
+      'Review the RACI weekly for the first month, then monthly thereafter.',
+      'When a stuck decision surfaces, test whether RACI was missing a cell or a name.',
+      'Migrate to RAPID only if you start seeing the same decision type recurring with new ambiguity.'
+    ];
+  } else if (rapidCount >= 4) {
+    verdict = 'USE RAPID';
+    color = 'rapid';
+    line = 'Your context has wide influence networks and high-stakes ambiguity. RAPID is the right tool here.';
+    why = 'You described a context with multiple influencers, infrequent but high-stakes decisions, and ambiguity in the question itself. RAPID handles this by separating the Recommend role (frames the question and the options) from the Decide role (makes the call). The Agree role adds stakeholder veto without bottlenecking the decision.';
+    steps = [
+      'Identify the Recommender first. They own the analysis and the options.',
+      'Name the Decider explicitly. One person, with a time limit.',
+      'List who must Agree (typically Legal, Compliance, or key stakeholders with veto rights).',
+      'Define who Performs once the decision is made.',
+      'Keep the Input list short. Wide consultation does not require wide input rights.'
+    ];
   } else {
-    color = 'weak';
-    verdict = 'COORDINATION AT RISK';
-    line = 'Major gaps across multiple dimensions. The first move is naming an owner-side coordination lead.';
+    verdict = 'USE BOTH';
+    color = 'both';
+    line = 'Your context has mixed signals. The right answer is to use both, in different layers of the project.';
+    why = 'Your responses suggest different decision types in the same project need different frameworks. Most owner-side projects need both: RACI for operational task assignment, RAPID for strategic, commercial, and contested calls. Pick the framework per decision type, not per project.';
+    steps = [
+      'Use RACI for routine operational decisions (RFIs, drawing approvals, weekly variations).',
+      'Use RAPID for high-stakes strategic, commercial, or contested decisions.',
+      'Document which framework applies to which decision type in your governance plan.',
+      'Train the team on both frameworks. The vocabulary matters.',
+      'Review framework fit quarterly. If a routine decision keeps stalling under RACI, escalate it to RAPID.'
+    ];
   }
 
-  // Header
-  const head = document.getElementById('resultHead');
-  head.className = 'result-head ' + color;
-  document.getElementById('scoreNum').textContent = overall + '%';
-  document.getElementById('scoreDtl').textContent = line;
+  document.getElementById('r2head').className = 'r2-head ' + color;
+  document.getElementById('r2title').textContent = verdict;
+  document.getElementById('r2line').textContent = line;
+  document.getElementById('r2why').textContent = why;
+  document.getElementById('r2steps').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
 
-  // Dimension breakdown
-  document.getElementById('dimScores').innerHTML = dimResults.map(d => `
-    <div class="ds-card ${d.key}">
-      <div class="nm">${d.name}</div>
-      <div class="pct">${d.pct}<small>%</small></div>
+  // Score row
+  const total = raciCount + rapidCount;
+  const raciPct = Math.round(raciCount / total * 100);
+  const rapidPct = Math.round(rapidCount / total * 100);
+  const raciWin = raciCount > rapidCount;
+  const rapidWin = rapidCount > raciCount;
+  document.getElementById('scoreRow').innerHTML = `
+    <div class="score-card ${raciWin ? 'win raci' : ''}">
+      <div class="nm raci">RACI</div>
+      <div class="val">${raciPct}<small>%</small></div>
     </div>
-  `).join('');
+    <div class="score-card ${rapidWin ? 'win rapid' : ''}">
+      <div class="nm rapid">RAPID</div>
+      <div class="val">${rapidPct}<small>%</small></div>
+    </div>
+  `;
 
-  // Priority gaps - identify the NO and PARTIAL answers, weighted by dimension score
-  const gaps = [];
-  DIMENSIONS.forEach(d => {
-    d.items.forEach((it, i) => {
-      const v = answers[d.key + '-' + i];
-      if (v === 'no') gaps.push({ text: it, dim: d.name, key: d.key, weight: 2 });
-      else if (v === 'partial') gaps.push({ text: it, dim: d.name, key: d.key, weight: 1 });
-    });
-  });
-  // Sort: NO first (weight 2), then PARTIAL (weight 1). Within each, keep original order.
-  gaps.sort((a, b) => b.weight - a.weight);
-  const top5 = gaps.slice(0, 5);
-
-  document.getElementById('gapList').innerHTML = top5.length > 0
-    ? top5.map((g, i) => `
-        <li>
-          <span class="rank">0${i+1}</span>
-          <span class="gtext">${g.text}</span>
-          <span class="gdim">${g.dim}</span>
-        </li>
-      `).join('')
-    : '<li><span class="gtext" style="color:var(--green);font-weight:700">No major gaps identified. Maintain current discipline and review quarterly.</span></li>';
-
-  // Next steps
-  const weakestDim = [...dimResults].sort((a, b) => a.pct - b.pct)[0];
-  let nextStepsText;
-  if (overall >= 75) {
-    nextStepsText = `Maintain the current cadence. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Run a focused sprint on the partial items in that dimension. Re-take the diagnostic in 90 days to confirm the gaps have closed.`;
-  } else if (overall >= 50) {
-    nextStepsText = `Focus the next 30 days on the top 5 gaps above. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Run a workshop to close the NO items, then return to the PARTIAL items. Re-take the diagnostic in 60 days.`;
-  } else {
-    nextStepsText = `First move: name an owner-side coordination lead with explicit authority and time allocated. Second move: address the top 5 gaps above in week one of mobilisation. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Treat coordination as a project in itself for the next 90 days.`;
-  }
-  document.getElementById('nextSteps').textContent = nextStepsText;
-
-  document.getElementById('result').classList.add('show');
-  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('result2').classList.add('show');
+  document.getElementById('result2').scrollIntoView({behavior:'smooth', block:'start'});
 }
-
-// ============================================================================
-// INIT
-// ============================================================================
-render();
 </script>
 </body>
 </html>
