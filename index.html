@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coordination Diagnostic :: Part 1</title>
+<style>
+  :root{
+    --bg:#EFF2F7; --bgCover:#ECE7E1;
+    --teal:#0D8A8C; --tealDark:#076E70; --red:#C84042; --orange:#E19041;
+    --navy:#2C3F67; --purple:#7B4B94; --slate:#475569;
+    --ink:#1F2A37; --inkSoft:#475569; --inkMute:#94A3B8;
+    --rule:#D6D9DE; --white:#FFFFFF; --beige:#E2D9D0; --mint:#D5DED9;
+    --green:#16A34A; --amber:#F59E0B;
+    --tealTint:#E0F0F0; --orangeTint:#FBE7D6; --navyTint:#D6DCE9;
+    --purpleTint:#E9DEEF; --redTint:#F4D8D9; --slateTint:#DDE2EA;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Calibri','Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1020px;margin:0 auto;padding:24px 18px 60px}
+
+  header{background:var(--bgCover);padding:32px 28px;border-radius:8px;margin-bottom:24px;position:relative;overflow:hidden}
+  header::before{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:var(--beige);right:-80px;top:-90px}
+  header::after{content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:var(--mint);right:60px;top:60px}
+  .series{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:6px;position:relative;z-index:1}
+  .partmark{font-size:13px;font-weight:700;color:var(--orange);letter-spacing:6px;margin-top:18px;position:relative;z-index:1}
+  h1{font-size:32px;font-weight:700;color:var(--ink);margin:6px 0 4px;position:relative;z-index:1;line-height:1.15}
+  .sub{font-size:18px;font-style:italic;color:var(--teal);margin:0 0 6px;position:relative;z-index:1}
+  .tag{font-size:13px;color:var(--inkSoft);position:relative;z-index:1;max-width:680px}
+
+  .intro{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:18px 24px;margin-bottom:18px}
+  .intro p{margin:0;font-size:13.5px;color:var(--inkSoft);font-style:italic;line-height:1.5}
+
+  .dim{background:var(--white);border:1px solid var(--rule);border-radius:8px;margin-bottom:14px;border-left:5px solid var(--rule);overflow:hidden}
+  .dim.d1{border-left-color:var(--teal)}
+  .dim.d2{border-left-color:var(--orange)}
+  .dim.d3{border-left-color:var(--navy)}
+  .dim.d4{border-left-color:var(--purple)}
+  .dim.d5{border-left-color:var(--red)}
+  .dim.d6{border-left-color:var(--slate)}
+
+  .dim-head{padding:16px 22px;border-bottom:1px solid var(--rule)}
+  .dim-head h3{margin:0;font-size:15px;color:var(--ink)}
+  .dim-head h3 .dnum{font-size:10px;font-weight:700;letter-spacing:4px;display:block;margin-bottom:4px}
+  .dim.d1 .dnum{color:var(--teal)} .dim.d2 .dnum{color:var(--orange)} .dim.d3 .dnum{color:var(--navy)}
+  .dim.d4 .dnum{color:var(--purple)} .dim.d5 .dnum{color:var(--red)} .dim.d6 .dnum{color:var(--slate)}
+  .dim-head .hlp{font-size:12px;color:var(--inkSoft);font-style:italic;margin:4px 0 0;line-height:1.4}
+
+  .items{padding:8px 22px 16px}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--rule)}
+  .item:last-child{border-bottom:0}
+  .item-text{flex:1;font-size:13px;color:var(--ink);line-height:1.4}
+  .item-choice{display:flex;gap:4px;flex-shrink:0}
+  .ich{padding:6px 12px;font-size:10px;font-weight:700;letter-spacing:1px;border:1px solid var(--rule);border-radius:4px;cursor:pointer;background:var(--white);color:var(--inkMute);transition:all .15s}
+  .ich:hover{border-color:var(--inkSoft);color:var(--ink)}
+  .ich.yes.sel{background:var(--green);border-color:var(--green);color:var(--white)}
+  .ich.partial.sel{background:var(--amber);border-color:var(--amber);color:var(--white)}
+  .ich.no.sel{background:var(--red);border-color:var(--red);color:var(--white)}
+
+  .actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;flex-wrap:wrap}
+  .btn{font-family:inherit;font-size:13px;font-weight:700;padding:11px 22px;border-radius:6px;border:0;cursor:pointer;letter-spacing:.5px}
+  .btn-primary{background:var(--teal);color:var(--white)}
+  .btn-primary:hover{background:var(--tealDark)}
+  .btn-primary:disabled{background:#9DB7B8;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--inkSoft);border:1px solid var(--rule)}
+  .btn-ghost:hover{color:var(--ink);border-color:var(--inkSoft)}
+
+  .progress{background:var(--white);border:1px solid var(--rule);border-radius:8px;padding:14px 22px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+  .progress .lbl{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--inkSoft)}
+  .progress .ct{font-size:18px;font-weight:700;color:var(--ink)}
+  .progress .bar{flex:1;height:8px;background:var(--bgCover);border-radius:4px;margin:0 18px;overflow:hidden;position:relative}
+  .progress .bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--teal);transition:width .25s;border-radius:4px}
+
+  .result{display:none;margin-top:20px}
+  .result.show{display:block}
+  .result-head{padding:24px 28px;color:var(--white);border-radius:8px 8px 0 0}
+  .result-head.strong{background:var(--green)}
+  .result-head.adequate{background:var(--amber)}
+  .result-head.weak{background:var(--red)}
+  .result-head .lbl{font-size:11px;font-weight:700;letter-spacing:6px;opacity:.9}
+  .result-head h2{margin:6px 0 0;font-size:36px}
+  .result-head .scoredtl{font-size:14px;opacity:.95;font-style:italic;margin-top:6px}
+  .result-body{background:var(--white);border:1px solid var(--rule);border-top:0;border-radius:0 0 8px 8px;padding:22px 28px}
+
+  h3.sec{font-size:11px;font-weight:700;color:var(--orange);letter-spacing:5px;margin:0 0 14px}
+
+  .dim-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+  .ds-card{background:var(--white);border:1px solid var(--rule);border-radius:6px;padding:12px;text-align:center}
+  .ds-card.d1{border-top:4px solid var(--teal)}
+  .ds-card.d2{border-top:4px solid var(--orange)}
+  .ds-card.d3{border-top:4px solid var(--navy)}
+  .ds-card.d4{border-top:4px solid var(--purple)}
+  .ds-card.d5{border-top:4px solid var(--red)}
+  .ds-card.d6{border-top:4px solid var(--slate)}
+  .ds-card .nm{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--inkSoft);margin-bottom:4px}
+  .ds-card .pct{font-size:26px;font-weight:700;color:var(--ink)}
+  .ds-card .pct small{font-size:11px;color:var(--inkMute);font-weight:400}
+
+  .gaps{list-style:none;padding:0;margin:0}
+  .gaps li{padding:11px 0;border-bottom:1px solid var(--rule);display:flex;gap:14px;font-size:13px}
+  .gaps li:last-child{border-bottom:0}
+  .gaps .rank{font-size:13px;font-weight:700;color:var(--red);min-width:30px}
+  .gaps .gtext{flex:1;color:var(--ink);line-height:1.4}
+  .gaps .gdim{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--inkMute);min-width:90px;align-self:center}
+
+  footer{margin-top:30px;padding:20px 0;border-top:1px solid var(--rule);font-size:12px;color:var(--inkSoft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media(max-width:680px){
+    h1{font-size:24px}
+    .item{flex-direction:column;align-items:stretch}
+    .progress{flex-wrap:wrap}
+    .progress .bar{flex-basis:100%;margin:8px 0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="series">THE DEVELOPER'S COORDINATION PLAYBOOK</div>
+    <div class="partmark">PART 01 :: INTERACTIVE TOOLKIT</div>
+    <h1>Coordination Diagnostic</h1>
+    <p class="sub">30 items. Six dimensions. One score.</p>
+    <p class="tag">A self-assessment for owner-side project teams. Score your current project across the six dimensions of coordination, identify the priority gaps, and decide where to focus the next 30 days.</p>
+  </header>
+
+  <div class="intro">
+    <p>Answer 30 items as YES (in place and working), PARTIAL (in place but not fully working), or NO (not in place). The diagnostic returns a percentage score, a per-dimension breakdown, and your top 5 priority gaps to close first.</p>
+  </div>
+
+  <div class="progress">
+    <span class="lbl">PROGRESS</span>
+    <div class="bar"><div class="bar-fill" id="progFill" style="width:0%"></div></div>
+    <span class="ct"><span id="progCt">0</span><small style="font-size:12px;color:var(--inkMute);font-weight:400"> / 30</small></span>
+  </div>
+
+  <div id="dimensions"></div>
+
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="resetAll()">Reset</button>
+    <button class="btn btn-primary" id="scoreBtn" onclick="showResult()" disabled>Score the diagnostic</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-head" id="resultHead">
+      <div class="lbl">COORDINATION SCORE</div>
+      <h2 id="scoreNum">0%</h2>
+      <div class="scoredtl" id="scoreDtl">...</div>
+    </div>
+    <div class="result-body">
+      <h3 class="sec">DIMENSION BREAKDOWN</h3>
+      <div class="dim-scores" id="dimScores"></div>
+
+      <h3 class="sec">TOP 5 PRIORITY GAPS</h3>
+      <ul class="gaps" id="gapList"></ul>
+
+      <h3 class="sec">WHAT TO DO NEXT</h3>
+      <p id="nextSteps" style="font-size:13.5px;color:var(--ink);line-height:1.55;margin:0"></p>
+
+      <div class="actions" style="margin-top:20px">
+        <button class="btn btn-ghost" onclick="resetAll()">Run again</button>
+        <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span><b>Thamer AlMujalli</b> · PMO-CP · PMI-CP · PMP · P6</span>
+    <span>The Developer's Coordination Playbook · Part 1 of 4</span>
+  </footer>
+
+</div>
+
+<script>
+// ============================================================================
+// THE 30 ITEMS (5 PER DIMENSION)
+// ============================================================================
+const DIMENSIONS = [
+  {
+    n: 1, key: 'd1', name: 'DISCIPLINES', color: 'teal',
+    help: 'How well disciplines coordinate inside the lead consultant\'s appointment.',
+    items: [
+      'A named owner-side coordination lead is in place, with authority and time allocated.',
+      'A federated BIM model is maintained and reviewed at an agreed cadence.',
+      'Discipline interfaces (architecture-structural-MEP-façade) are tracked in a live register.',
+      'Clash detection runs are scheduled, with closure tracked against an owner-side target.',
+      'Sustainability and code compliance are integrated from concept, not bolted on at IFC.'
+    ]
+  },
+  {
+    n: 2, key: 'd2', name: 'PACKAGES', color: 'orange',
+    help: 'Coordination across packages, contractors, and consultants.',
+    items: [
+      'A package interface matrix exists, identifying every cross-package dependency.',
+      'Each interface has a named owner on each side, with escalation routes defined.',
+      'Package handovers (from one contractor to the next) follow a defined readiness checklist.',
+      'Long-lead items and shared services (cranes, hoists, power) are coordinated centrally.',
+      'Package scope overlaps and gaps are reviewed before each tender is released.'
+    ]
+  },
+  {
+    n: 3, key: 'd3', name: 'STAKEHOLDERS', color: 'navy',
+    help: 'Coordination across sponsors, regulators, end users, and lenders.',
+    items: [
+      'A stakeholder map names every party, their interest, and their decision rhythm.',
+      'Regulator engagement (REGA, Balady, NWC, Saudi Energy, Mostadam) has a single owner-side contact.',
+      'Sponsor and board updates have a defined format, frequency, and decision agenda.',
+      'End users and operators are engaged before design freeze, not after handover.',
+      'Lender and equity coordination tracks drawdown gates and term conditions in real time.'
+    ]
+  },
+  {
+    n: 4, key: 'd4', name: 'SEQUENCE', color: 'purple',
+    help: 'Coordination across project stages, from design to operations.',
+    items: [
+      'Each stage gate has a defined readiness checklist before progression is approved.',
+      'Design-to-tender handover preserves discipline coordination through procurement.',
+      'Tender-to-construction handover transfers interface management to the contractor team.',
+      'Construction-to-handover transition includes operator training and asset register validation.',
+      'Lessons learned are captured live at each stage, not as a post-project exercise.'
+    ]
+  },
+  {
+    n: 5, key: 'd5', name: 'INFORMATION', color: 'red',
+    help: 'The CDE, BIM, registers, and project record. Owned by the owner.',
+    items: [
+      'An owner-side Common Data Environment is live, not adopted from the contractor.',
+      'Document numbering, revision control, and access permissions are defined and enforced.',
+      'A single federated BIM model is the source of truth for design coordination.',
+      'RFI, RAID, and decisions registers are maintained on the owner side, not the contractor side.',
+      'The project record will survive the contractor leaving site, in a format the owner can read.'
+    ]
+  },
+  {
+    n: 6, key: 'd6', name: 'DECISIONS', color: 'slate',
+    help: 'Decision rights, decision rhythm, and decision documentation.',
+    items: [
+      'A decision rights matrix exists, distinguishing strategic, technical, commercial, and schedule decisions.',
+      'Each decision type has a named decider, recommender, consulted, and informed party.',
+      'A standing decisions log records every material decision with its basis and date.',
+      'Escalation thresholds are defined, with time limits before a decision is automatically escalated.',
+      'Stuck decisions are identified weekly and routed to a named individual to break.'
+    ]
+  }
+];
+
+// ============================================================================
+// STATE
+// ============================================================================
+const answers = {}; // { 'd1-0': 'yes' | 'partial' | 'no', ... }
+const VAL = { yes: 1.0, partial: 0.5, no: 0.0 };
+
+// ============================================================================
+// RENDER DIMENSIONS
+// ============================================================================
+function render() {
+  const root = document.getElementById('dimensions');
+  root.innerHTML = DIMENSIONS.map(d => `
+    <div class="dim ${d.key}">
+      <div class="dim-head">
+        <h3><span class="dnum">DIMENSION 0${d.n}</span>${d.name}</h3>
+        <p class="hlp">${d.help}</p>
+      </div>
+      <div class="items">
+        ${d.items.map((it, i) => `
+          <div class="item">
+            <div class="item-text">${it}</div>
+            <div class="item-choice">
+              <button class="ich yes" onclick="setAnswer('${d.key}',${i},'yes')">YES</button>
+              <button class="ich partial" onclick="setAnswer('${d.key}',${i},'partial')">PARTIAL</button>
+              <button class="ich no" onclick="setAnswer('${d.key}',${i},'no')">NO</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setAnswer(key, idx, val) {
+  const id = key + '-' + idx;
+  answers[id] = val;
+  // Update button styles
+  const item = document.querySelectorAll(`.dim.${key} .item`)[idx];
+  item.querySelectorAll('.ich').forEach(b => b.classList.remove('sel'));
+  item.querySelector(`.ich.${val}`).classList.add('sel');
+  // Update progress
+  const ct = Object.keys(answers).length;
+  document.getElementById('progCt').textContent = ct;
+  document.getElementById('progFill').style.width = (ct / 30 * 100) + '%';
+  document.getElementById('scoreBtn').disabled = ct < 30;
+}
+
+function resetAll() {
+  for (const k in answers) delete answers[k];
+  document.querySelectorAll('.ich').forEach(b => b.classList.remove('sel'));
+  document.getElementById('progCt').textContent = '0';
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('scoreBtn').disabled = true;
+  document.getElementById('result').classList.remove('show');
+}
+
+// ============================================================================
+// SCORING
+// ============================================================================
+function showResult() {
+  // Compute per-dimension scores
+  const dimResults = DIMENSIONS.map(d => {
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < d.items.length; i++) {
+      const v = answers[d.key + '-' + i];
+      if (v !== undefined) {
+        sum += VAL[v];
+        count++;
+      }
+    }
+    const pct = count > 0 ? Math.round((sum / count) * 100) : 0;
+    return { ...d, pct, sum, count };
+  });
+
+  // Overall score
+  const overallSum = dimResults.reduce((a, d) => a + d.sum, 0);
+  const overallCount = dimResults.reduce((a, d) => a + d.count, 0);
+  const overall = Math.round((overallSum / overallCount) * 100);
+
+  // Verdict
+  let verdict, line, color;
+  if (overall >= 75) {
+    color = 'strong';
+    verdict = 'STRONG COORDINATION POSTURE';
+    line = 'The fundamentals are in place. Focus on the residual gaps and the dimensions still scoring partial.';
+  } else if (overall >= 50) {
+    color = 'adequate';
+    verdict = 'ADEQUATE BUT INCOMPLETE';
+    line = 'Coordination is partly working, partly improvised. The gaps below are the priorities for the next 30 days.';
+  } else {
+    color = 'weak';
+    verdict = 'COORDINATION AT RISK';
+    line = 'Major gaps across multiple dimensions. The first move is naming an owner-side coordination lead.';
+  }
+
+  // Header
+  const head = document.getElementById('resultHead');
+  head.className = 'result-head ' + color;
+  document.getElementById('scoreNum').textContent = overall + '%';
+  document.getElementById('scoreDtl').textContent = line;
+
+  // Dimension breakdown
+  document.getElementById('dimScores').innerHTML = dimResults.map(d => `
+    <div class="ds-card ${d.key}">
+      <div class="nm">${d.name}</div>
+      <div class="pct">${d.pct}<small>%</small></div>
+    </div>
+  `).join('');
+
+  // Priority gaps - identify the NO and PARTIAL answers, weighted by dimension score
+  const gaps = [];
+  DIMENSIONS.forEach(d => {
+    d.items.forEach((it, i) => {
+      const v = answers[d.key + '-' + i];
+      if (v === 'no') gaps.push({ text: it, dim: d.name, key: d.key, weight: 2 });
+      else if (v === 'partial') gaps.push({ text: it, dim: d.name, key: d.key, weight: 1 });
+    });
+  });
+  // Sort: NO first (weight 2), then PARTIAL (weight 1). Within each, keep original order.
+  gaps.sort((a, b) => b.weight - a.weight);
+  const top5 = gaps.slice(0, 5);
+
+  document.getElementById('gapList').innerHTML = top5.length > 0
+    ? top5.map((g, i) => `
+        <li>
+          <span class="rank">0${i+1}</span>
+          <span class="gtext">${g.text}</span>
+          <span class="gdim">${g.dim}</span>
+        </li>
+      `).join('')
+    : '<li><span class="gtext" style="color:var(--green);font-weight:700">No major gaps identified. Maintain current discipline and review quarterly.</span></li>';
+
+  // Next steps
+  const weakestDim = [...dimResults].sort((a, b) => a.pct - b.pct)[0];
+  let nextStepsText;
+  if (overall >= 75) {
+    nextStepsText = `Maintain the current cadence. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Run a focused sprint on the partial items in that dimension. Re-take the diagnostic in 90 days to confirm the gaps have closed.`;
+  } else if (overall >= 50) {
+    nextStepsText = `Focus the next 30 days on the top 5 gaps above. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Run a workshop to close the NO items, then return to the PARTIAL items. Re-take the diagnostic in 60 days.`;
+  } else {
+    nextStepsText = `First move: name an owner-side coordination lead with explicit authority and time allocated. Second move: address the top 5 gaps above in week one of mobilisation. The weakest dimension is ${weakestDim.name} at ${weakestDim.pct}%. Treat coordination as a project in itself for the next 90 days.`;
+  }
+  document.getElementById('nextSteps').textContent = nextStepsText;
+
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ============================================================================
+// INIT
+// ============================================================================
+render();
+</script>
+</body>
+</html>
